@@ -3,16 +3,20 @@
   "info": {
     "title": "AI-Bridge GitHub API",
     "description": "GPTs와 로컬 DB/API를 연결하는 GitHub 브릿지. DB 쿼리 전 반드시 getDbSchema로 테이블/열 정보를 확인하세요. 주요 테이블: FDTFN001(펀드마스터), FDTFN201(일별NAV), DWPM10040(수익률), DWPM10530(보유종목)",
-    "version": "2.2.0"
+    "version": "2.3.0"
   },
-  "servers": [{"url": "https://api.github.com"}],
+  "servers": [
+    {"url": "https://api.github.com", "description": "GitHub API (write)"},
+    {"url": "https://raw.githubusercontent.com/etrezero/AI-Bridge/main", "description": "Raw content (read)"}
+  ],
   "paths": {
-    "/repos/etrezero/AI-Bridge/contents/db_schema.json": {
+    "/db_schema.json": {
       "get": {
         "operationId": "getDbSchema",
         "summary": "Get database schema reference (13 tables)",
         "description": "DB 쿼리 전 반드시 먼저 호출! 13개 테이블 정보 반환: FDTFN001(펀드마스터), FDTFN201(일별NAV/설정액), FDTPF301(포트폴리오), DWPM10040(수익률), DWPM10510(일별상세), DWPM10530(보유종목), DWPM11030(자금흐름), DWPI10011(펀드정보), DWPI10021(종목마스터), BB_TDF0JG, BMJISU, BB_EOD0IX, BB_HLDCLS. TDF펀드코드 매핑, 운용사코드, 예시쿼리 포함.",
-        "responses": {"200": {"description": "DB schema (Base64 JSON) - tables, columns, example_queries, tdf_focus_fund_codes, company_codes, common_queries, join_patterns, filter_tips"}}
+        "servers": [{"url": "https://raw.githubusercontent.com/etrezero/AI-Bridge/main"}],
+        "responses": {"200": {"description": "DB schema JSON - tables, columns, example_queries, tdf_focus_fund_codes, company_codes"}}
       }
     },
     "/repos/etrezero/AI-Bridge/contents/gpts_commands/{filename}": {
