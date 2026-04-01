@@ -2,23 +2,11 @@
   "openapi": "3.1.0",
   "info": {
     "title": "AI-Bridge GitHub API",
-    "description": "GPTs와 로컬 DB/API를 연결하는 GitHub 브릿지. DB 쿼리 전 반드시 getDbSchema로 테이블/열 정보를 확인하세요. 주요 테이블: FDTFN001(펀드마스터), FDTFN201(일별NAV), DWPM10040(수익률), DWPM10530(보유종목)",
-    "version": "2.3.0"
+    "description": "GPTs와 로컬 DB를 연결하는 GitHub 브릿지.\n\n## DB 스키마 (13개 테이블)\n\n### 펀드 기본\n- **FDTFN001**: 펀드마스터 (fund_cd, fund_fnm, haeji_gb, seolj_ymd)\n- **FDTFN201**: 일별NAV (gijun_ymd, fund_cd, seolj_aek, nav, stock_paek, bond_paek)\n- **FDTPF301**: 포트폴리오 (gijun_ymd, fund_cd, jasan_gb, jm_upj_nm, jm_rt)\n\n### 펀드 상세 (DWPM/DWPI)\n- **DWPM10040**: 수익률 (std_dt, fund_cd, fund_bm_ds_cd[F/B], mm1_ern_rt, mm3_ern_rt, yy1_ern_rt, bgyr_next_ern_rt)\n- **DWPM10510**: 일별상세 (STD_DT, FUND_CD, NAST_AMT, MOD_STPR)\n- **DWPM10530**: 보유종목 (STD_DT, FUND_CD, ITEM_CD, ITEM_NM, NAST_TAMT_AGNST_WGH)\n- **DWPM11030**: 자금흐름 (pcs_dt, fund_cd, dbit_cr_ds_cd[DR/CR], dbit_amt, cr_amt)\n- **DWPI10011**: 펀드정보 (FUND_CD, FUND_NM, FRST_OPNG_DT)\n- **DWPI10021**: 종목마스터 (ITEM_CD, ITEM_NM, TKR_CD)\n\n### 지수/기타\n- **BB_TDF0JG**: TDF자산배분 (tr_ymd, ticker, item_ticker)\n- **BMJISU**: 채권지수 (d_tr_ymd, i_index_cd, f_bond_index)\n- **BB_EOD0IX**: 일별지수 (tr_ymd, ticker, val)\n- **BB_HLDCLS**: 지수구성 (tr_ymd, idx_nm, sec_nm, wt)\n\n## TDF 펀드코드\nTIF:07M02, 2030:07J66, 2035:07J71, 2040:07J76, 2045:07J81, 2050:07J86, 2055:07J91, 2060:07J96\n\n## 필터 팁\n- 운용중: haeji_gb='1'\n- TDF: fund_fnm LIKE '%TDF%'\n- 펀드수익률: fund_bm_ds_cd='F'\n- 최신일자: gijun_ymd=(SELECT MAX(gijun_ymd) FROM FDTFN201)",
+    "version": "2.4.0"
   },
-  "servers": [
-    {"url": "https://api.github.com", "description": "GitHub API (write)"},
-    {"url": "https://raw.githubusercontent.com/etrezero/AI-Bridge/main", "description": "Raw content (read)"}
-  ],
+  "servers": [{"url": "https://api.github.com"}],
   "paths": {
-    "/db_schema.json": {
-      "get": {
-        "operationId": "getDbSchema",
-        "summary": "Get database schema reference (13 tables)",
-        "description": "DB 쿼리 전 반드시 먼저 호출! 13개 테이블 정보 반환: FDTFN001(펀드마스터), FDTFN201(일별NAV/설정액), FDTPF301(포트폴리오), DWPM10040(수익률), DWPM10510(일별상세), DWPM10530(보유종목), DWPM11030(자금흐름), DWPI10011(펀드정보), DWPI10021(종목마스터), BB_TDF0JG, BMJISU, BB_EOD0IX, BB_HLDCLS. TDF펀드코드 매핑, 운용사코드, 예시쿼리 포함.",
-        "servers": [{"url": "https://raw.githubusercontent.com/etrezero/AI-Bridge/main"}],
-        "responses": {"200": {"description": "DB schema JSON - tables, columns, example_queries, tdf_focus_fund_codes, company_codes"}}
-      }
-    },
     "/repos/etrezero/AI-Bridge/contents/gpts_commands/{filename}": {
       "put": {
         "operationId": "createCommand",
