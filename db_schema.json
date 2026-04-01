@@ -1,0 +1,44 @@
+{
+  "database": "FundDB",
+  "tables": {
+    "hantu_tdf": {
+      "description": "TDF 펀드 데이터",
+      "columns": {
+        "fund_cd": "펀드코드 (PK)",
+        "fund_nm": "펀드명",
+        "std_dt": "기준일자 (YYYY-MM-DD)",
+        "nav": "기준가",
+        "aum": "설정원본",
+        "return_1m": "1개월 수익률",
+        "return_3m": "3개월 수익률",
+        "return_ytd": "연초이후 수익률"
+      },
+      "example_query": "SELECT fund_cd, fund_nm, nav FROM hantu_tdf WHERE std_dt = '2026-03-31' LIMIT 10"
+    },
+    "fred_indicators": {
+      "description": "FRED 거시경제 지표",
+      "columns": {
+        "indicator_cd": "지표코드 (GDP, CPI 등)",
+        "indicator_nm": "지표명",
+        "obs_dt": "관측일",
+        "value": "값",
+        "unit": "단위"
+      },
+      "example_query": "SELECT indicator_cd, obs_dt, value FROM fred_indicators WHERE indicator_cd = 'GDP' ORDER BY obs_dt DESC LIMIT 5"
+    },
+    "fund_benchmark": {
+      "description": "펀드 벤치마크 데이터",
+      "columns": {
+        "bm_cd": "벤치마크코드",
+        "bm_nm": "벤치마크명",
+        "std_dt": "기준일",
+        "index_value": "지수값"
+      }
+    }
+  },
+  "common_queries": [
+    {"name": "최신 TDF 펀드 목록", "sql": "SELECT DISTINCT fund_cd, fund_nm FROM hantu_tdf ORDER BY fund_nm"},
+    {"name": "특정 펀드 수익률", "sql": "SELECT std_dt, nav, return_1m FROM hantu_tdf WHERE fund_cd = '{fund_cd}' ORDER BY std_dt DESC LIMIT 30"},
+    {"name": "FRED 주요 지표", "sql": "SELECT * FROM fred_indicators WHERE indicator_cd IN ('GDP', 'CPI', 'UNRATE') ORDER BY obs_dt DESC"}
+  ]
+}
