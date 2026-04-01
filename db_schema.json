@@ -1,7 +1,7 @@
 {
   "database": "dt",
   "host": "192.168.195.55",
-  "description": "펀드/TDF/지수 데이터베이스",
+  "description": "펀드/TDF/지수/거시경제 데이터베이스 (JSX React Vite 서비스 연동)",
   "tables": {
     "FDTFN001": {
       "description": "펀드 마스터 (Fund Master) - 펀드 기본정보",
@@ -9,99 +9,161 @@
         "fund_cd": "펀드코드 (PK, varchar12)",
         "fund_fnm": "펀드명 (varchar100)",
         "unyong_cd": "운용사코드 (varchar3)",
-        "unyong_fund_cd": "운용펀드코드 (varchar12)",
-        "fund_gb": "펀드구분 (varchar1)",
         "haeji_gb": "해지구분 (1=운용중, 2=해지)",
-        "haeji_ymd": "해지일자 (YYYYMMDD)",
         "seolj_ymd": "설정일자 (YYYYMMDD)",
-        "unit_ga": "단위가격 (double)",
-        "gijun_unit": "기준좌수 (double)",
-        "fst_seolj_aek": "최초설정액 (double)",
-        "fst_gijun_ga": "최초기준가 (double)",
-        "bm_cd": "벤치마크코드 (varchar10)",
-        "bm_nm": "벤치마크명 (varchar200)",
-        "stock_pnib_rt": "주식편입비율 (double)",
-        "kosdaq_pnib_rt": "코스닥편입비율 (double)"
+        "bm_cd": "벤치마크코드",
+        "bm_nm": "벤치마크명"
       },
       "example_queries": [
         "SELECT fund_cd, fund_fnm FROM FDTFN001 WHERE fund_fnm LIKE '%TDF%' AND haeji_gb='1' LIMIT 10",
-        "SELECT fund_cd, fund_fnm, bm_nm FROM FDTFN001 WHERE fund_fnm LIKE '%한국투자%' AND haeji_gb='1'",
-        "SELECT fund_cd, fund_fnm, seolj_ymd FROM FDTFN001 WHERE unyong_cd='001' ORDER BY seolj_ymd DESC LIMIT 20"
+        "SELECT fund_cd, fund_fnm FROM FDTFN001 WHERE fund_fnm LIKE '%한국투자%' AND haeji_gb='1'"
       ]
     },
     "FDTFN201": {
       "description": "펀드 일별 데이터 (Fund Daily) - NAV/설정액/수익률",
       "columns": {
-        "gijun_ymd": "기준일자 (PK, char8, YYYYMMDD)",
-        "fund_cd": "펀드코드 (PK, varchar12)",
-        "seolj_aek": "설정액 (double, 원)",
-        "seolj_jwa": "설정좌수 (double)",
-        "gijun_ga": "기준가 (double)",
-        "nav": "순자산가치 (double)",
-        "silh_suik_rt": "실현수익률 (double, %)",
-        "bm_suik_rt": "벤치마크수익률 (double, %)",
-        "silj_suik_rt": "실질수익률 (double, %)",
-        "suik_jisu": "수익지수 (double)",
-        "bm_suik_jisu": "벤치마크수익지수 (double)",
-        "stock_paek": "주식비중 (double, %)",
-        "bond_paek": "채권비중 (double, %)",
-        "cash_paek": "현금비중 (double, %)",
-        "investment_etf": "ETF투자비중 (double, %)"
+        "gijun_ymd": "기준일자 (PK, YYYYMMDD)",
+        "fund_cd": "펀드코드 (PK)",
+        "seolj_aek": "설정액 (원)",
+        "gijun_ga": "기준가",
+        "nav": "순자산가치",
+        "silh_suik_rt": "실현수익률 (%)",
+        "suik_jisu": "수익지수",
+        "stock_paek": "주식비중 (%)",
+        "bond_paek": "채권비중 (%)"
       },
       "example_queries": [
         "SELECT gijun_ymd, fund_cd, seolj_aek, nav FROM FDTFN201 ORDER BY gijun_ymd DESC LIMIT 10",
         "SELECT MAX(gijun_ymd) as latest_date FROM FDTFN201",
-        "SELECT gijun_ymd, seolj_aek, gijun_ga, nav FROM FDTFN201 WHERE fund_cd='펀드코드' ORDER BY gijun_ymd DESC LIMIT 30",
         "SELECT f.fund_fnm, d.seolj_aek, d.nav FROM FDTFN001 f JOIN FDTFN201 d ON f.fund_cd=d.fund_cd WHERE d.gijun_ymd=(SELECT MAX(gijun_ymd) FROM FDTFN201) ORDER BY d.seolj_aek DESC LIMIT 10"
       ]
     },
     "FDTPF301": {
-      "description": "펀드 포트폴리오 (Fund Portfolio) - 보유종목/자산배분",
+      "description": "펀드 포트폴리오 (Fund Portfolio) - 보유종목",
       "columns": {
-        "gijun_ymd": "기준일자 (PK, char8)",
-        "fund_cd": "펀드코드 (PK, varchar12)",
-        "jasan_gb": "자산구분 (char2)",
-        "ranking": "순위 (double)",
-        "jm_upj_cd": "종목업종코드 (varchar20)",
-        "jm_upj_nm": "종목업종명 (varchar60)",
-        "jm_rt": "종목비율 (double, %)",
-        "jm_pyunga_aek": "종목평가액 (double)",
-        "markt_rt": "시장비율 (double, %)",
-        "fund_rt": "펀드비율 (double, %)",
-        "md_dur": "수정듀레이션 (double)",
-        "grade_nm": "등급명 (varchar40)"
+        "gijun_ymd": "기준일자 (PK)",
+        "fund_cd": "펀드코드 (PK)",
+        "jasan_gb": "자산구분 (C1=대안, S1=주식, B1=채권)",
+        "ranking": "순위",
+        "jm_upj_nm": "종목업종명",
+        "jm_rt": "종목비율 (%)",
+        "jm_pyunga_aek": "종목평가액"
       },
       "example_queries": [
-        "SELECT jm_upj_nm, jm_rt, jm_pyunga_aek FROM FDTPF301 WHERE fund_cd='펀드코드' ORDER BY ranking",
-        "SELECT fund_cd, jasan_gb, SUM(jm_pyunga_aek) as total FROM FDTPF301 WHERE gijun_ymd='20260331' GROUP BY fund_cd, jasan_gb"
+        "SELECT jm_upj_nm, jm_rt FROM FDTPF301 WHERE fund_cd='펀드코드' AND gijun_ymd=(SELECT MAX(gijun_ymd) FROM FDTPF301) ORDER BY ranking"
+      ]
+    },
+    "DWPM10040": {
+      "description": "펀드 수익률 (Fund Performance) - 기간별 수익률",
+      "columns": {
+        "std_dt": "기준일자 (YYYYMMDD)",
+        "fund_cd": "펀드코드",
+        "fund_bm_ds_cd": "펀드/BM 구분 (F=펀드, B=벤치마크)",
+        "mod_stpr": "수정기준가",
+        "mm1_ern_rt": "1개월 수익률 (%)",
+        "mm3_ern_rt": "3개월 수익률 (%)",
+        "mm6_ern_rt": "6개월 수익률 (%)",
+        "yy1_ern_rt": "1년 수익률 (%)",
+        "yy3_ern_rt": "3년 수익률 (%)",
+        "bgyr_next_ern_rt": "연초이후 수익률 (YTD)"
+      },
+      "example_queries": [
+        "SELECT std_dt, mm1_ern_rt, mm3_ern_rt, yy1_ern_rt FROM DWPM10040 WHERE fund_cd='07M02' AND fund_bm_ds_cd='F' ORDER BY std_dt DESC LIMIT 10",
+        "SELECT fund_cd, mm1_ern_rt, bgyr_next_ern_rt FROM DWPM10040 WHERE std_dt='20260331' AND fund_bm_ds_cd='F'"
+      ]
+    },
+    "DWPM10510": {
+      "description": "펀드 일별 상세 (Fund Daily Detail) - 기준가/수탁고",
+      "columns": {
+        "STD_DT": "기준일자 (YYYYMMDD)",
+        "FUND_CD": "펀드코드",
+        "NAST_AMT": "순자산총액 (수탁고)",
+        "TOT_AST_AMT": "총자산",
+        "MOD_STPR": "수정기준가 (NAV)",
+        "STPR": "기준가"
+      },
+      "example_queries": [
+        "SELECT STD_DT, FUND_CD, MOD_STPR AS nav, NAST_AMT AS aum FROM DWPM10510 WHERE FUND_CD='07M02' ORDER BY STD_DT DESC LIMIT 30",
+        "SELECT FUND_CD, NAST_AMT FROM DWPM10510 WHERE STD_DT=(SELECT MAX(STD_DT) FROM DWPM10510) ORDER BY NAST_AMT DESC LIMIT 20"
+      ]
+    },
+    "DWPM10530": {
+      "description": "펀드 보유종목 (Fund Holdings) - 포트폴리오 상세",
+      "columns": {
+        "STD_DT": "기준일자",
+        "FUND_CD": "펀드코드",
+        "ITEM_CD": "종목코드",
+        "ITEM_NM": "종목명",
+        "HOLD_AST_DS_CD": "보유자산구분",
+        "AST_CLSF_CD_NM": "자산분류명",
+        "NAST_TAMT_AGNST_WGH": "순자산대비 비중 (%)",
+        "TKR_CD": "티커코드"
+      },
+      "example_queries": [
+        "SELECT A.STD_DT, A.ITEM_NM, A.NAST_TAMT_AGNST_WGH as weight, B.TKR_CD as ticker FROM DWPM10530 A LEFT JOIN DWPI10021 B ON A.ITEM_CD=B.ITEM_CD WHERE A.FUND_CD='07M02' ORDER BY A.NAST_TAMT_AGNST_WGH DESC LIMIT 10"
+      ]
+    },
+    "DWPM11030": {
+      "description": "펀드 자금흐름 (Fund Flows) - 설정/환매",
+      "columns": {
+        "pcs_dt": "처리일자",
+        "fund_cd": "펀드코드",
+        "dbit_cr_ds_cd": "차대구분 (DR=설정, CR=환매)",
+        "dbit_amt": "차변금액 (설정액)",
+        "cr_amt": "대변금액 (환매액)"
+      },
+      "example_queries": [
+        "SELECT pcs_dt, fund_cd, SUM(CASE WHEN dbit_cr_ds_cd='DR' THEN dbit_amt ELSE 0 END) as inflow, SUM(CASE WHEN dbit_cr_ds_cd='CR' THEN cr_amt ELSE 0 END) as outflow FROM DWPM11030 GROUP BY pcs_dt, fund_cd ORDER BY pcs_dt DESC LIMIT 20"
+      ]
+    },
+    "DWPI10011": {
+      "description": "펀드 마스터 (운용사) - 상세 펀드정보",
+      "columns": {
+        "IMC_CD": "운용사코드",
+        "FUND_CD": "펀드코드",
+        "FUND_NM": "펀드명",
+        "FUND_WHL_NM": "펀드전체명",
+        "FRST_OPNG_DT": "최초설정일"
+      },
+      "example_queries": [
+        "SELECT FUND_CD, FUND_NM, FRST_OPNG_DT FROM DWPI10011 WHERE FUND_NM LIKE '%TDF%' LIMIT 10"
+      ]
+    },
+    "DWPI10021": {
+      "description": "종목 마스터 (Item Master) - ETF/주식 종목정보",
+      "columns": {
+        "ITEM_CD": "종목코드",
+        "ITEM_NM": "종목명",
+        "TKR_CD": "티커코드",
+        "HOLD_AST_DS_CD": "보유자산구분",
+        "GICS_IDTP_CD": "GICS 업종코드"
+      },
+      "example_queries": [
+        "SELECT ITEM_CD, ITEM_NM, TKR_CD FROM DWPI10021 WHERE ITEM_NM LIKE '%SPY%' OR TKR_CD='SPY'"
       ]
     },
     "BB_TDF0JG": {
       "description": "TDF 자산배분 (TDF Asset Allocation)",
       "columns": {
-        "tr_ymd": "거래일자 (varchar8, YYYYMMDD)",
-        "ticker": "티커 (varchar20)",
-        "obj_id": "객체ID (varchar12)",
-        "item_ticker": "종목티커 (varchar50)",
-        "op_unit": "운용단위 (double)",
-        "tg_unit": "목표단위 (double)"
+        "tr_ymd": "거래일자",
+        "ticker": "티커",
+        "item_ticker": "종목티커",
+        "op_unit": "운용단위",
+        "tg_unit": "목표단위"
       },
       "example_queries": [
-        "SELECT * FROM BB_TDF0JG ORDER BY tr_ymd DESC LIMIT 10",
-        "SELECT tr_ymd, ticker, item_ticker, op_unit, tg_unit FROM BB_TDF0JG WHERE ticker LIKE '%TDF%'"
+        "SELECT * FROM BB_TDF0JG ORDER BY tr_ymd DESC LIMIT 10"
       ]
     },
     "BMJISU": {
       "description": "채권지수 (Bond Index)",
       "columns": {
-        "d_tr_ymd": "거래일자 (varchar8)",
-        "i_index_cd": "지수코드 (varchar15)",
-        "i_bond_type": "채권유형 (varchar10)",
-        "i_mangi_gb": "만기구분 (varchar3)",
-        "f_bond_index": "채권지수값 (double)",
-        "f_day_rtn": "일간수익률 (double)",
-        "f_duration": "듀레이션 (double)",
-        "f_ytm": "만기수익률 (double)"
+        "d_tr_ymd": "거래일자",
+        "i_index_cd": "지수코드",
+        "f_bond_index": "채권지수",
+        "f_day_rtn": "일간수익률",
+        "f_duration": "듀레이션",
+        "f_ytm": "만기수익률"
       },
       "example_queries": [
         "SELECT d_tr_ymd, i_index_cd, f_bond_index, f_day_rtn FROM BMJISU ORDER BY d_tr_ymd DESC LIMIT 10"
@@ -110,9 +172,9 @@
     "BB_EOD0IX": {
       "description": "일별 지수 (Daily Index)",
       "columns": {
-        "tr_ymd": "거래일자 (varchar8)",
-        "ticker": "티커 (varchar20)",
-        "val": "지수값 (double)"
+        "tr_ymd": "거래일자",
+        "ticker": "티커",
+        "val": "지수값"
       },
       "example_queries": [
         "SELECT tr_ymd, ticker, val FROM BB_EOD0IX WHERE ticker='KOSPI' ORDER BY tr_ymd DESC LIMIT 10"
@@ -121,38 +183,60 @@
     "BB_HLDCLS": {
       "description": "지수 구성종목 (Index Holdings)",
       "columns": {
-        "tr_ymd": "거래일자 (varchar8)",
-        "idx_nm": "지수명 (varchar100)",
-        "idx_tck": "지수티커 (varchar20)",
-        "sec_nm": "종목명 (varchar200)",
-        "sec_tkr": "종목티커 (varchar12)",
-        "sec_isin": "ISIN (varchar12)",
-        "cntry": "국가 (varchar4)",
-        "pri": "가격 (double)",
-        "mkt_cap": "시가총액 (double)",
-        "wt": "비중 (double, %)"
+        "tr_ymd": "거래일자",
+        "idx_nm": "지수명",
+        "sec_nm": "종목명",
+        "sec_tkr": "종목티커",
+        "wt": "비중 (%)"
       },
       "example_queries": [
         "SELECT sec_nm, sec_tkr, wt FROM BB_HLDCLS WHERE idx_tck='KOSPI200' ORDER BY wt DESC LIMIT 20"
       ]
     }
   },
+  "tdf_focus_fund_codes": {
+    "description": "TDF 포커스 펀드코드 (한국투자TDF)",
+    "funds": {
+      "TIF": "07M02",
+      "2030": "07J66",
+      "2035": "07J71",
+      "2040": "07J76",
+      "2045": "07J81",
+      "2050": "07J86",
+      "2055": "07J91",
+      "2060": "07J96",
+      "장기자산": "07Q93"
+    }
+  },
+  "company_codes": {
+    "description": "운용사코드 → 회사명",
+    "mapping": {
+      "K55101": "한국투자",
+      "K55102": "하나",
+      "K55105": "삼성",
+      "K55107": "우리",
+      "K55223": "KB",
+      "K55301": "미래에셋",
+      "K55232": "NH-Amundi"
+    }
+  },
   "common_queries": {
     "TDF펀드목록": "SELECT fund_cd, fund_fnm FROM FDTFN001 WHERE fund_fnm LIKE '%TDF%' AND haeji_gb='1'",
     "최신기준일": "SELECT MAX(gijun_ymd) FROM FDTFN201",
-    "펀드설정액순위": "SELECT f.fund_fnm, d.seolj_aek/100000000 as 설정액_억 FROM FDTFN001 f JOIN FDTFN201 d ON f.fund_cd=d.fund_cd WHERE d.gijun_ymd=(SELECT MAX(gijun_ymd) FROM FDTFN201) AND f.haeji_gb='1' ORDER BY d.seolj_aek DESC LIMIT 20",
-    "한국투자TDF": "SELECT f.fund_cd, f.fund_fnm, d.seolj_aek, d.nav FROM FDTFN001 f JOIN FDTFN201 d ON f.fund_cd=d.fund_cd WHERE f.fund_fnm LIKE '%한국투자%TDF%' AND f.haeji_gb='1' AND d.gijun_ymd=(SELECT MAX(gijun_ymd) FROM FDTFN201)",
-    "펀드수익률조회": "SELECT gijun_ymd, gijun_ga, nav, silh_suik_rt FROM FDTFN201 WHERE fund_cd='펀드코드' ORDER BY gijun_ymd DESC LIMIT 30",
-    "자산배분현황": "SELECT stock_paek, bond_paek, cash_paek, investment_etf FROM FDTFN201 WHERE fund_cd='펀드코드' ORDER BY gijun_ymd DESC LIMIT 1"
+    "펀드설정액순위": "SELECT f.fund_fnm, d.seolj_aek/100000000 as 설정액_억 FROM FDTFN001 f JOIN FDTFN201 d ON f.fund_cd=d.fund_cd WHERE d.gijun_ymd=(SELECT MAX(gijun_ymd) FROM FDTFN201) ORDER BY d.seolj_aek DESC LIMIT 20",
+    "한국투자TDF수익률": "SELECT std_dt, fund_cd, mm1_ern_rt, mm3_ern_rt, yy1_ern_rt, bgyr_next_ern_rt FROM DWPM10040 WHERE fund_cd IN ('07M02','07J66','07J71','07J76','07J81','07J86') AND fund_bm_ds_cd='F' AND std_dt=(SELECT MAX(std_dt) FROM DWPM10040)",
+    "펀드보유종목TOP10": "SELECT A.ITEM_NM, A.NAST_TAMT_AGNST_WGH as weight FROM DWPM10530 A WHERE A.FUND_CD='펀드코드' AND A.STD_DT=(SELECT MAX(STD_DT) FROM DWPM10530 WHERE FUND_CD='펀드코드') ORDER BY A.NAST_TAMT_AGNST_WGH DESC LIMIT 10"
   },
-  "join_examples": {
-    "펀드마스터+일별데이터": "FDTFN001 f JOIN FDTFN201 d ON f.fund_cd = d.fund_cd",
-    "펀드마스터+포트폴리오": "FDTFN001 f JOIN FDTPF301 p ON f.fund_cd = p.fund_cd"
+  "join_patterns": {
+    "펀드마스터+일별": "FDTFN001 f JOIN FDTFN201 d ON f.fund_cd = d.fund_cd",
+    "보유종목+종목마스터": "DWPM10530 A LEFT JOIN DWPI10021 B ON A.ITEM_CD = B.ITEM_CD"
   },
   "filter_tips": {
-    "운용중펀드만": "haeji_gb = '1'",
+    "운용중펀드": "haeji_gb = '1'",
     "TDF펀드": "fund_fnm LIKE '%TDF%'",
-    "디폴트옵션": "fund_fnm LIKE '%O%'",
-    "최신일자": "gijun_ymd = (SELECT MAX(gijun_ymd) FROM FDTFN201)"
+    "모펀드만": "fund_fnm LIKE '%(모)%' OR fund_fnm LIKE '%모투자%'",
+    "최신일자": "gijun_ymd = (SELECT MAX(gijun_ymd) FROM FDTFN201)",
+    "펀드수익률": "fund_bm_ds_cd = 'F'",
+    "BM수익률": "fund_bm_ds_cd = 'B'"
   }
 }
