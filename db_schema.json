@@ -1,44 +1,83 @@
 {
-  "database": "FundDB",
+  "database": "dt",
+  "host": "192.168.195.55",
   "tables": {
-    "hantu_tdf": {
-      "description": "TDF 펀드 데이터",
+    "FDTFN001": {
+      "description": "펀드 마스터 (Fund Master)",
       "columns": {
-        "fund_cd": "펀드코드 (PK)",
-        "fund_nm": "펀드명",
-        "std_dt": "기준일자 (YYYY-MM-DD)",
-        "nav": "기준가",
-        "aum": "설정원본",
-        "return_1m": "1개월 수익률",
-        "return_3m": "3개월 수익률",
-        "return_ytd": "연초이후 수익률"
+        "fund_cd": "펀드코드 (varchar 12, PK)",
+        "fund_fnm": "펀드명 (varchar 100)",
+        "unyong_cd": "운용사코드 (varchar 3)",
+        "seolj_ymd": "설정일 (char 8, YYYYMMDD)",
+        "haeji_gb": "해지구분 (1=운용중, 2=해지)",
+        "haeji_ymd": "해지일 (varchar 8)",
+        "bm_cd": "벤치마크코드 (varchar 10)",
+        "bm_nm": "벤치마크명 (varchar 200)",
+        "stock_pnib_rt": "주식편입비율",
+        "kitca_type_cd": "KITCA유형코드"
       },
-      "example_query": "SELECT fund_cd, fund_nm, nav FROM hantu_tdf WHERE std_dt = '2026-03-31' LIMIT 10"
+      "example_queries": [
+        "SELECT fund_cd, fund_fnm FROM FDTFN001 WHERE fund_fnm LIKE '%TDF%' AND haeji_gb='1' LIMIT 10",
+        "SELECT fund_cd, fund_fnm, bm_nm FROM FDTFN001 WHERE unyong_cd='088' LIMIT 10"
+      ]
     },
-    "fred_indicators": {
-      "description": "FRED 거시경제 지표",
+    "FDTFN201": {
+      "description": "펀드 일별 데이터 (Daily Fund Data)",
       "columns": {
-        "indicator_cd": "지표코드 (GDP, CPI 등)",
-        "indicator_nm": "지표명",
-        "obs_dt": "관측일",
-        "value": "값",
-        "unit": "단위"
+        "gijun_ymd": "기준일자 (char 8, YYYYMMDD)",
+        "fund_cd": "펀드코드 (varchar 12)",
+        "seolj_aek": "설정액 (double)",
+        "seolj_jwa": "설정좌수 (double)",
+        "gijun_ga": "기준가 (double)",
+        "nav": "NAV (double)",
+        "silh_suik_rt": "실현수익률 (double)",
+        "bm_suik_rt": "BM수익률 (double)",
+        "stock_paek": "주식비중 (double)",
+        "bond_paek": "채권비중 (double)",
+        "cash_paek": "현금비중 (double)"
       },
-      "example_query": "SELECT indicator_cd, obs_dt, value FROM fred_indicators WHERE indicator_cd = 'GDP' ORDER BY obs_dt DESC LIMIT 5"
+      "example_queries": [
+        "SELECT gijun_ymd, fund_cd, seolj_aek, gijun_ga, nav FROM FDTFN201 WHERE fund_cd='K55105CJ7982' ORDER BY gijun_ymd DESC LIMIT 10",
+        "SELECT MAX(gijun_ymd) as latest_date FROM FDTFN201"
+      ]
     },
-    "fund_benchmark": {
-      "description": "펀드 벤치마크 데이터",
+    "BB_TDF0JG": {
+      "description": "TDF 자산배분 데이터",
       "columns": {
-        "bm_cd": "벤치마크코드",
-        "bm_nm": "벤치마크명",
-        "std_dt": "기준일",
-        "index_value": "지수값"
-      }
+        "tr_ymd": "거래일자 (varchar 8)",
+        "ticker": "티커 (varchar 20)",
+        "obj_id": "객체ID (varchar 12)",
+        "item_ticker": "항목티커 (varchar 50)",
+        "op_unit": "운용단위 (double)",
+        "tg_unit": "목표단위 (double)"
+      },
+      "example_queries": [
+        "SELECT tr_ymd, ticker, item_ticker, op_unit FROM BB_TDF0JG ORDER BY tr_ymd DESC LIMIT 10"
+      ]
     }
   },
   "common_queries": [
-    {"name": "최신 TDF 펀드 목록", "sql": "SELECT DISTINCT fund_cd, fund_nm FROM hantu_tdf ORDER BY fund_nm"},
-    {"name": "특정 펀드 수익률", "sql": "SELECT std_dt, nav, return_1m FROM hantu_tdf WHERE fund_cd = '{fund_cd}' ORDER BY std_dt DESC LIMIT 30"},
-    {"name": "FRED 주요 지표", "sql": "SELECT * FROM fred_indicators WHERE indicator_cd IN ('GDP', 'CPI', 'UNRATE') ORDER BY obs_dt DESC"}
+    {
+      "name": "TDF 펀드 목록 (운용중)",
+      "sql": "SELECT fund_cd, fund_fnm FROM FDTFN001 WHERE fund_fnm LIKE '%TDF%' AND haeji_gb='1' ORDER BY fund_fnm"
+    },
+    {
+      "name": "특정 펀드 최근 데이터",
+      "sql": "SELECT f.fund_fnm, d.gijun_ymd, d.seolj_aek, d.gijun_ga, d.nav FROM FDTFN001 f JOIN FDTFN201 d ON f.fund_cd=d.fund_cd WHERE f.fund_cd='{fund_cd}' ORDER BY d.gijun_ymd DESC LIMIT 30"
+    },
+    {
+      "name": "한국투자 TDF 디폴트옵션",
+      "sql": "SELECT f.fund_cd, f.fund_fnm, d.seolj_aek, d.nav FROM FDTFN001 f JOIN FDTFN201 d ON f.fund_cd=d.fund_cd WHERE f.fund_fnm LIKE '%한국투자%' AND f.fund_fnm LIKE '%TDF%' AND f.haeji_gb='1' AND d.gijun_ymd=(SELECT MAX(gijun_ymd) FROM FDTFN201)"
+    },
+    {
+      "name": "최신 기준일 확인",
+      "sql": "SELECT MAX(gijun_ymd) as latest_date FROM FDTFN201"
+    }
+  ],
+  "notes": [
+    "날짜형식: YYYYMMDD (예: 20260401)",
+    "fund_cd는 12자리 문자열",
+    "haeji_gb='1'은 운용중인 펀드",
+    "seolj_aek 단위는 원화"
   ]
 }
