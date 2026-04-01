@@ -61,6 +61,17 @@
     }
   },
   "components": {
+    "schemas": {
+      "CommandContent": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": {"type": "string", "description": "Unique command ID (e.g., cmd_20260401_123456)"},
+          "type": {"type": "string", "enum": ["db_query", "api_call"], "description": "Command type"},
+          "query": {"type": "string", "description": "SQL query for db_query type"}
+        }
+      }
+    },
     "securitySchemes": {"bearerAuth": {"type": "http", "scheme": "bearer"}}
   },
   "security": [{"bearerAuth": []}]
